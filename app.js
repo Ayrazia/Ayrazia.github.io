@@ -29,14 +29,57 @@ const elements = {
     errorMessage: document.getElementById('error-message')
 };
 
+// Utility to refresh DOM references in case the script was parsed before the DOM
+function refreshElements() {
+    const ids = {
+        cityInput: 'city-input',
+        searchBtn: 'search-btn',
+        notifyBtn: 'notify-btn',
+        themeToggle: 'theme-toggle',
+        weatherSection: 'weather-section',
+        favoritesSection: 'favorites-section',
+        favoritesList: 'favorites-list',
+        favoriteBtn: 'favorite-btn',
+        cityName: 'city-name',
+        temperature: 'temperature',
+        weatherIcon: 'weather-icon',
+        wind: 'wind',
+        humidity: 'humidity',
+        feelsLike: 'feels-like',
+        hourlyList: 'hourly-list',
+        loading: 'loading',
+        errorMessage: 'error-message'
+    };
+
+    for (const key in ids) {
+        try {
+            elements[key] = document.getElementById(ids[key]);
+        } catch (e) {
+            elements[key] = elements[key] || null;
+        }
+    }
+}
+
 // ===== État de l'application =====
 let currentCity = null;
 
 // ===== Initialisation =====
-document.addEventListener('DOMContentLoaded', () => {
-    updateNotifyButton();
-    registerServiceWorker();
-});
+function init() {
+    try {
+        refreshElements();
+    } catch (e) {
+        console.warn('refreshElements failed', e);
+    }
+    try { updateNotifyButton(); } catch (e) { /* noop */ }
+    try { registerServiceWorker(); } catch (e) { /* noop */ }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    // Si le DOM est déjà prêt (script chargé tard), initialiser immédiatement
+    init();
+}
 
 // ===== Service Worker =====
 async function registerServiceWorker() {

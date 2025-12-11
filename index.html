@@ -77,31 +77,32 @@
     <script src="/app.js"></script>
 
     <script>
-        // Attacher listeners de secours après le chargement de app.js
-        (function attachFallbackListeners(){
-            const searchBtn = document.getElementById('search-btn');
-            const notifyBtn = document.getElementById('notify-btn');
-            const themeToggle = document.getElementById('theme-toggle');
+        // Diagnostic : attache des listeners en JS et log l'existence des fonctions globales
+        (function attachDebugListeners(){
+            try {
+                console.log('Debug: window.handleSearch=', typeof window.handleSearch);
+                console.log('Debug: window.requestNotificationPermission=', typeof window.requestNotificationPermission);
+                console.log('Debug: window.toggleTheme=', typeof window.toggleTheme);
 
-            if (searchBtn) {
-                searchBtn.addEventListener('click', () => {
-                    if (typeof handleSearch === 'function') return handleSearch();
-                    console.warn('handleSearch() non défini');
-                });
-            }
+                const safeCall = (fnName) => {
+                    if (typeof window[fnName] === 'function') {
+                        try { window[fnName](); }
+                        catch (e) { console.error('Erreur lors de l\'appel de', fnName, e); }
+                    } else {
+                        console.warn(fnName, 'non défini');
+                    }
+                };
 
-            if (notifyBtn) {
-                notifyBtn.addEventListener('click', () => {
-                    if (typeof requestNotificationPermission === 'function') return requestNotificationPermission();
-                    console.warn('requestNotificationPermission() non défini');
-                });
-            }
+                const searchBtn = document.getElementById('search-btn');
+                if (searchBtn) searchBtn.addEventListener('click', (e) => { e.preventDefault(); safeCall('handleSearch'); });
 
-            if (themeToggle) {
-                themeToggle.addEventListener('click', () => {
-                    if (typeof toggleTheme === 'function') return toggleTheme();
-                    console.warn('toggleTheme() non défini');
-                });
+                const notifyBtn = document.getElementById('notify-btn');
+                if (notifyBtn) notifyBtn.addEventListener('click', (e) => { e.preventDefault(); safeCall('requestNotificationPermission'); });
+
+                const themeBtn = document.getElementById('theme-toggle');
+                if (themeBtn) themeBtn.addEventListener('click', (e) => { e.preventDefault(); safeCall('toggleTheme'); });
+            } catch (err) {
+                console.error('attachDebugListeners erreur', err);
             }
         })();
     </script>
