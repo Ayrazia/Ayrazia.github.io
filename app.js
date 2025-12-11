@@ -35,12 +35,48 @@ let currentCity = null;
 document.addEventListener('DOMContentLoaded', () => {
     registerServiceWorker();
 
+    // Chargement du thème
+    initTheme();
+
     // Écouteurs UI
     elements.searchBtn?.addEventListener('click', handleSearch);
     elements.cityInput?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') handleSearch();
     });
+
+    // Theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
 });
+
+// ===== THEME =====
+function initTheme() {
+    try {
+        const saved = localStorage.getItem(CONFIG.STORAGE_KEY_THEME);
+        if (saved === 'dark') {
+            document.body.classList.add('dark');
+            const btn = document.getElementById('theme-toggle');
+            if (btn) { btn.setAttribute('aria-pressed', 'true'); btn.textContent = '☀️'; }
+        }
+    } catch (e) {
+        // ignore localStorage errors
+    }
+}
+
+function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    try {
+        localStorage.setItem(CONFIG.STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
+    } catch (e) {}
+
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+        btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+        btn.textContent = isDark ? '☀️' : '🌙';
+    }
+}
 
 // ===== Service Worker =====
 async function registerServiceWorker() {
