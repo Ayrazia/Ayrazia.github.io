@@ -1,0 +1,31 @@
+/* Styles minimaux pour l'application météo */
+:root{
+  --bg:#f7fbff;
+  --card:#ffffff;
+  --accent:#1e88e5;
+  --muted:#666;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+body{background:var(--bg);color:#111;display:flex;align-items:center;justify-content:center;padding:24px}
+.container{width:100%;max-width:520px;background:var(--card);padding:20px;border-radius:12px;box-shadow:0 6px 18px rgba(12,24,48,0.08)}
+h1{margin:0 0 12px;font-size:1.6rem}
+.search{display:flex;gap:8px;margin-bottom:12px}
+.search input{flex:1;padding:10px 12px;border:1px solid #e6eef9;border-radius:8px;font-size:1rem}
+.search button{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
+.hidden{display:none}
+#loading{margin:12px 0;color:var(--muted)}
+#error-message{color:#b00020;margin:12px 0}
+.results{margin-top:12px}
+.current{display:flex;gap:12px;align-items:center}
+.icon{font-size:2.4rem}
+.temp{font-size:2rem;font-weight:600}
+.feels,.wind,.humidity{color:var(--muted);font-size:0.95rem}
+.hourly{display:flex;gap:8px;margin-top:8px}
+.hourly-item{background:#f3f8ff;padding:8px;border-radius:8px;text-align:center;min-width:64px}
+.hourly-item.rain-alert{border:2px solid #1976d2}
+.hourly-item.temp-alert{border:2px solid #ff9800}
+.hourly-time{font-size:0.9rem;color:var(--muted)}
+.hourly-icon{font-size:1.2rem;margin:6px 0}
+.hourly-temp{font-weight:600}
+

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Météo — Recherche</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <main class="container">
+        <h1>Météo</h1>
+        <div class="search">
+            <input id="city-input" type="search" placeholder="Entrez une ville" aria-label="Ville" />
+            <button id="search-btn">Rechercher</button>
+        </div>
+
+        <div id="loading" class="hidden">Chargement…</div>
+        <div id="error-message" class="hidden" role="alert"></div>
+
+        <section id="weather-section" class="hidden results">
+            <h2 id="city-name"></h2>
+            <div class="current">
+                <div id="weather-icon" class="icon"></div>
+                <div class="temps">
+                    <div id="temperature" class="temp"></div>
+                    <div id="feels-like" class="feels"></div>
+                    <div id="wind" class="wind"></div>
+                    <div id="humidity" class="humidity"></div>
+                </div>
+            </div>
+
+            <h3>Prochaines heures</h3>
+            <div id="hourly-list" class="hourly"></div>
+        </section>
+    </main>
+
+    <script src="/app.js"></script>
+</body>
+</html>
