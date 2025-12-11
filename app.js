@@ -35,48 +35,12 @@ let currentCity = null;
 document.addEventListener('DOMContentLoaded', () => {
     registerServiceWorker();
 
-    // Chargement du thème
-    initTheme();
-
     // Écouteurs UI
     elements.searchBtn?.addEventListener('click', handleSearch);
     elements.cityInput?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') handleSearch();
     });
-
-    // Theme toggle
-    const themeToggle = document.getElementById('theme-toggle');
-    if (themeToggle) {
-        themeToggle.addEventListener('click', toggleTheme);
-    }
 });
-
-// ===== THEME =====
-function initTheme() {
-    try {
-        const saved = localStorage.getItem(CONFIG.STORAGE_KEY_THEME);
-        if (saved === 'dark') {
-            document.body.classList.add('dark');
-            const btn = document.getElementById('theme-toggle');
-            if (btn) { btn.setAttribute('aria-pressed', 'true'); btn.textContent = '☀️'; }
-        }
-    } catch (e) {
-        // ignore localStorage errors
-    }
-}
-
-function toggleTheme() {
-    const isDark = document.body.classList.toggle('dark');
-    try {
-        localStorage.setItem(CONFIG.STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
-    } catch (e) {}
-
-    const btn = document.getElementById('theme-toggle');
-    if (btn) {
-        btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
-        btn.textContent = isDark ? '☀️' : '🌙';
-    }
-}
 
 // ===== Service Worker =====
 async function registerServiceWorker() {
@@ -237,16 +201,12 @@ function displayWeather(data, cityName) {
     elements.humidity.textContent = `${current.relative_humidity_2m} %`;
     elements.feelsLike.textContent = `${Math.round(current.apparent_temperature)}°C`;
 
-    // Trouver l'index de l'heure courante dans hourly.time (première heure future)
-    const now = Date.now();
-    let currentIndex = hourly.time.findIndex(t => new Date(t).getTime() > now);
-    if (currentIndex === -1) currentIndex = 0; // fallback
-
     // Prévisions horaires (4 prochaines heures)
+    const currentHour = new Date().getHours();
     const hourlyItems = [];
 
     for (let i = 0; i < 4; i++) {
-        const hourIndex = currentIndex + i;
+        const hourIndex = currentHour + i + 1;
         if (hourIndex < hourly.time.length) {
             const time = new Date(hourly.time[hourIndex]);
             const temp = hourly.temperature_2m[hourIndex];
@@ -274,9 +234,7 @@ function displayWeather(data, cityName) {
 
 function checkWeatherAlerts(data, cityName) {
     const hourly = data.hourly;
-    const now = Date.now();
-    let currentIndex = hourly.time.findIndex(t => new Date(t).getTime() > now);
-    if (currentIndex === -1) currentIndex = 0;
+    const currentHour = new Date().getHours();
 
     let rainAlert = false;
     let tempAlert = false;
@@ -284,8 +242,8 @@ function checkWeatherAlerts(data, cityName) {
     let highTemp = null;
 
     // Vérifier les 4 prochaines heures
-    for (let i = 0; i < 4; i++) {
-        const hourIndex = currentIndex + i;
+    for (let i = 1; i <= 4; i++) {
+        const hourIndex = currentHour + i;
         if (hourIndex < hourly.time.length) {
             const code = hourly.weather_code[hourIndex];
             const temp = hourly.temperature_2m[hourIndex];
@@ -293,7 +251,7 @@ function checkWeatherAlerts(data, cityName) {
             // Vérifier la pluie
             if (!rainAlert && CONFIG.RAIN_CODES.includes(code)) {
                 rainAlert = true;
-                rainHour = i + 1; // i=0 => dans 1 heure
+                rainHour = i;
             }
 
             // Vérifier la température > 10°C
