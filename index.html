@@ -1,111 +1,42 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Météo — Recherche</title>
-    <link rel="stylesheet" href="/style.css">
-    <link rel="manifest" href="/manifest.json">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Météo — Recherche</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
 </head>
 <body>
-    <main class="container">
-        <h1>Météo</h1>
+  <main class="container">
+    <h1>Météo</h1>
 
-        <!-- Barre d'actions minimale : bouton notifications + bascule thème -->
-        <div class="toolbar">
-            <button id="notify-btn" type="button">🔔 Activer notifications</button>
-            <button id="theme-toggle" type="button" aria-pressed="false" title="Basculer thème">🌓</button>
+    <div class="search">
+      <input id="city-input" type="search" placeholder="Entrez une ville" aria-label="Ville">
+      <button id="search-btn" type="button">Rechercher</button>
+    </div>
+
+    <div id="loading" class="hidden">Chargement…</div>
+    <div id="error-message" class="hidden" role="alert"></div>
+
+    <section id="weather-section" class="hidden results">
+      <h2 id="city-name"></h2>
+      <div class="current">
+        <div id="weather-icon" class="icon"></div>
+        <div class="temps">
+          <div id="temperature" class="temp"></div>
+          <div id="feels-like" class="feels"></div>
+          <div id="wind" class="wind"></div>
+          <div id="humidity" class="humidity"></div>
         </div>
+      </div>
 
-        <div class="search">
-            <input id="city-input" type="search" placeholder="Entrez une ville" aria-label="Ville" />
-            <button id="search-btn" type="button">Rechercher</button>
-        </div>
+      <h3>Prochaines heures</h3>
+      <div id="hourly-list" class="hourly"></div>
+    </section>
 
-        <div id="loading" class="hidden">Chargement…</div>
-        <div id="error-message" class="hidden" role="alert"></div>
+  </main>
 
-        <section id="weather-section" class="hidden results">
-            <h2 id="city-name"></h2>
-            <div class="current">
-                <div id="weather-icon" class="icon"></div>
-                <div class="temps">
-                    <div id="temperature" class="temp"></div>
-                    <div id="feels-like" class="feels"></div>
-                    <div id="wind" class="wind"></div>
-                    <div id="humidity" class="humidity"></div>
-                </div>
-            </div>
-
-            <h3>Prochaines heures</h3>
-            <div id="hourly-list" class="hourly"></div>
-        </section>
-
-        <!-- Section favoris (placeholder, cachée par défaut) -->
-        <section id="favorites-section" class="hidden">
-            <h3>Favoris</h3>
-            <ul id="favorites-list"></ul>
-            <button id="favorite-btn" class="hidden">Ajouter aux favoris</button>
-        </section>
-
-    </main>
-
-    <script>
-        // Petite gestion de thème côté client (ne modifie pas app.js)
-        const THEME_KEY = 'meteo-pwa-theme';
-        function applyTheme(theme) {
-            if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-            else document.documentElement.removeAttribute('data-theme');
-            const btn = document.getElementById('theme-toggle');
-            if (btn) btn.setAttribute('aria-pressed', theme === 'dark');
-            try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
-        }
-        function toggleTheme() {
-            const current = localStorage.getItem(THEME_KEY) || '';
-            const next = current === 'dark' ? '' : 'dark';
-            applyTheme(next);
-        }
-        // Appliquer le thème stocké au chargement
-        (function(){
-            try {
-                const stored = localStorage.getItem(THEME_KEY);
-                if (stored) applyTheme(stored);
-            } catch (e) {}
-        })();
-    </script>
-
-    <script src="/app.js"></script>
-
-    <script>
-        // Diagnostic : attache des listeners en JS et log l'existence des fonctions globales
-        (function attachDebugListeners(){
-            try {
-                console.log('Debug: window.handleSearch=', typeof window.handleSearch);
-                console.log('Debug: window.requestNotificationPermission=', typeof window.requestNotificationPermission);
-                console.log('Debug: window.toggleTheme=', typeof window.toggleTheme);
-
-                const safeCall = (fnName) => {
-                    if (typeof window[fnName] === 'function') {
-                        try { window[fnName](); }
-                        catch (e) { console.error('Erreur lors de l\'appel de', fnName, e); }
-                    } else {
-                        console.warn(fnName, 'non défini');
-                    }
-                };
-
-                const searchBtn = document.getElementById('search-btn');
-                if (searchBtn) searchBtn.addEventListener('click', (e) => { e.preventDefault(); safeCall('handleSearch'); });
-
-                const notifyBtn = document.getElementById('notify-btn');
-                if (notifyBtn) notifyBtn.addEventListener('click', (e) => { e.preventDefault(); safeCall('requestNotificationPermission'); });
-
-                const themeBtn = document.getElementById('theme-toggle');
-                if (themeBtn) themeBtn.addEventListener('click', (e) => { e.preventDefault(); safeCall('toggleTheme'); });
-            } catch (err) {
-                console.error('attachDebugListeners erreur', err);
-            }
-        })();
-    </script>
-
+  <script src="/app.js"></script>
 </body>
 </html>
