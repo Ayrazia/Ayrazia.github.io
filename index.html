@@ -3,46 +3,59 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>MeteoR - Recherche</title>
+    <title>MeteoR</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <meta name="theme-color" content="#f6f9ff" id="meta-theme-color">
 </head>
 <body>
-<main class="container">
-    <header class="app-header">
-        <h1>MeteoR</h1>
-        <button id="theme-toggle" aria-label="Changer le thème">🌙</button>
-    </header>
+<div class="main-wrapper">
+    <main class="weather-card">
+        <header class="app-header">
+            <h1>MeteoR</h1>
+            <button id="theme-toggle" aria-label="Changer le thème">🌙</button>
+        </header>
 
-    <div class="search">
-        <input id="city-input" type="search" placeholder="Entrez une ville" aria-label="Ville">
-        <button id="search-btn">Rechercher</button>
-    </div>
-
-    <div id="loading" class="hidden">Chargement…</div>
-    <div id="error-message" class="error hidden" role="alert"></div>
-
-    <section id="weather-section" class="hidden results">
-        <div class="summary">
-            <div id="city-name" class="city">-</div>
-            <div class="temp-row">
-                <div id="weather-icon" class="icon">🌤️</div>
-                <div id="temperature" class="temp">--°C</div>
-            </div>
-            <div class="meta">
-                <div id="wind"></div>
-                <div id="humidity"></div>
-                <div id="feels-like"></div>
-            </div>
+        <div class="search">
+            <input id="city-input" type="search" placeholder="Entrez une ville" aria-label="Ville">
+            <button id="search-btn">Rechercher</button>
         </div>
 
-        <div class="hourly">
-            <h2>Prochaines heures</h2>
-            <div id="hourly-list" class="hourly-list"></div>
-        </div>
-    </section>
-</main>
+        <div id="loading" class="hidden">Chargement…</div>
+        <div id="error-message" class="error hidden" role="alert"></div>
+
+        <section id="weather-section" class="hidden results">
+            <div class="summary">
+                <div class="city-row">
+                    <div id="city-name" class="city">-</div>
+                    <button id="favorite-btn" class="heart-btn" aria-label="Ajouter aux favoris" title="Ajouter aux favoris">🤍</button>
+                </div>
+
+                <div class="temp-row">
+                    <div id="weather-icon" class="icon">🌤️</div>
+                    <div id="temperature" class="temp">--°C</div>
+                </div>
+                <div class="meta">
+                    <div id="wind"></div>
+                    <div id="humidity"></div>
+                    <div id="feels-like"></div>
+                </div>
+            </div>
+
+            <div class="hourly">
+                <h2>Prochaines heures</h2>
+                <div id="hourly-list" class="hourly-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <aside class="favorites-card">
+        <h2>Favoris ❤️</h2>
+        <ul id="favorites-list" class="favorites-list">
+        </ul>
+        <div id="no-favorites" class="empty-state">Aucun favori enregistré</div>
+    </aside>
+</div>
 
 <script src="app.js"></script>
 </body>
