@@ -36,10 +36,10 @@ body {
   transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* Layout global : Flexbox pour mettre côte à côte */
+/* Layout global : Flexbox */
 .main-wrapper {
   display: flex;
-  flex-wrap: wrap; /* Passe à la ligne sur mobile */
+  flex-wrap: wrap;
   justify-content: center;
   align-items: flex-start;
   gap: 20px;
@@ -48,7 +48,7 @@ body {
   padding: 0 20px;
 }
 
-/* Styles communs des cartes */
+/* Styles des cartes */
 .weather-card, .favorites-card {
   background: var(--card);
   padding: 20px;
@@ -109,9 +109,9 @@ h2 { margin: 0 0 12px 0; font-size: 18px; }
 }
 .favorites-list li:hover { background: var(--hover-bg); }
 .favorites-list li:last-child { border-bottom: none; }
-.delete-fav { background: none; border: none; cursor: pointer; font-size: 16px; opacity: 0.5; }
-.delete-fav:hover { opacity: 1; }
-.empty-state { color: var(--muted); font-style: italic; text-align: center; padding: 10px; }
+.delete-fav { background: none; border: none; cursor: pointer; font-size: 14px; opacity: 0.6; color: var(--muted); padding: 4px 8px; }
+.delete-fav:hover { opacity: 1; color: var(--danger); }
+.empty-state { color: var(--muted); font-style: italic; text-align: center; padding: 10px; font-size: 0.9em; }
 
 /* Heures */
 .hourly h2 { font-size: 1em; margin-bottom: 10px; color: var(--muted); }

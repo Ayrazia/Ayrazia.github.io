@@ -24,7 +24,6 @@ const elements = {
     loading: document.getElementById('loading'),
     errorMessage: document.getElementById('error-message'),
     metaThemeColor: document.getElementById('meta-theme-color'),
-    // Nouveaux éléments Favoris
     favoriteBtn: document.getElementById('favorite-btn'),
     favoritesList: document.getElementById('favorites-list'),
     noFavoritesMsg: document.getElementById('no-favorites')
@@ -38,7 +37,7 @@ let favorites = [];
 document.addEventListener('DOMContentLoaded', () => {
     registerServiceWorker();
     initTheme();
-    loadFavorites(); // Charger les favoris au démarrage
+    loadFavorites();
 
     // Écouteurs UI
     elements.searchBtn?.addEventListener('click', handleSearch);
@@ -63,7 +62,11 @@ async function registerServiceWorker() {
 function loadFavorites() {
     const stored = localStorage.getItem(CONFIG.STORAGE_KEY_FAVORITES);
     if (stored) {
-        favorites = JSON.parse(stored);
+        try {
+            favorites = JSON.parse(stored);
+        } catch (e) {
+            favorites = [];
+        }
     }
     renderFavorites();
 }
@@ -75,7 +78,6 @@ function saveFavorites() {
 
 function isFavorite(city) {
     if (!city) return false;
-    // On compare par le nom pour simplifier (ou lat/lon pour être précis)
     return favorites.some(f => f.name === city.name);
 }
 
@@ -118,10 +120,10 @@ function renderFavorites() {
 
             // Clic sur supprimer -> supprime le favori
             li.querySelector('.delete-fav').addEventListener('click', (e) => {
-                e.stopPropagation(); // Empêche le chargement de la ville
+                e.stopPropagation();
                 favorites = favorites.filter(f => f.name !== city.name);
                 saveFavorites();
-                // Si c'est la ville en cours, mettre à jour le bouton
+                // Si c'est la ville en cours, reset l'icône
                 if (currentCity && currentCity.name === city.name) {
                     elements.favoriteBtn.textContent = '🤍';
                     elements.favoriteBtn.classList.remove('active');
@@ -134,9 +136,7 @@ function renderFavorites() {
 }
 
 async function loadFavoriteCity(city) {
-    // Remplir l'input pour visibilité
     elements.cityInput.value = city.name.split(',')[0];
-    // Appeler directement la météo sans refaire le géocodage (optimisation)
     await fetchWeather(city.lat, city.lon, city.name);
 }
 
@@ -171,13 +171,37 @@ function applyTheme(theme) {
     }
 }
 
-// ===== Notifications (inchangé) =====
+// ===== Notifications =====
 function isNotificationSupported() { return 'Notification' in window && typeof Notification !== 'undefined'; }
-// ... (garder les fonctions de notification existantes telles quelles si besoin, ou utiliser celles du fichier précédent) ...
-// Pour alléger la réponse, je remets les fonctions simplifiées mais fonctionnelles :
+
+async function requestNotificationPermission() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'denied') return;
+    try { await Notification.requestPermission(); } catch (error) {}
+}
+
 function sendWeatherNotification(city, message, type) {
-    if (!isNotificationSupported() || Notification.permission !== 'granted') return;
-    try { new Notification('MeteoR', { body: `${city} — ${message}`, icon: 'icons/icon-192.png' }); } catch(e){}
+    if (!isNotificationSupported()) return;
+
+    if (Notification.permission === 'granted') {
+        const options = {
+            body: `${city} — ${message}`,
+            icon: 'icons/icon-192.png',
+            tag: `meteo-${type}-${city}`,
+            renotify: true
+        };
+
+        navigator.serviceWorker.getRegistration().then(reg => {
+            if (reg && reg.showNotification) reg.showNotification('MeteoR', options);
+            else new Notification('MeteoR', options);
+        }).catch(() => {
+            new Notification('MeteoR', options);
+        });
+    } else if (Notification.permission === 'default') {
+        requestNotificationPermission().then(() => {
+            if (Notification.permission === 'granted') sendWeatherNotification(city, message, type);
+        });
+    }
 }
 
 // ===== Recherche et API Météo =====
@@ -284,14 +308,43 @@ function displayWeather(data, cityName) {
 }
 
 function checkWeatherAlerts(data, cityName) {
-    // Logique simplifiée pour l'exemple
     const hourly = data.hourly;
     const currentHour = new Date().getHours();
-    // ... même logique d'alerte que précédemment ...
+    let rainAlert = false;
+    let tempAlert = false;
+    let rainHour = null;
+    let highTemp = null;
+
+    for (let i = 1; i <= 4; i++) {
+        const hourIndex = currentHour + i;
+        if (hourIndex < hourly.time.length) {
+            const code = hourly.weather_code[hourIndex];
+            const temp = hourly.temperature_2m[hourIndex];
+
+            if (!rainAlert && CONFIG.RAIN_CODES.includes(code)) {
+                rainAlert = true;
+                rainHour = i;
+            }
+            if (!tempAlert && temp > CONFIG.TEMP_THRESHOLD) {
+                tempAlert = true;
+                highTemp = Math.round(temp);
+            }
+        }
+    }
+
+    if (rainAlert) sendWeatherNotification(cityName, `🌧️ Pluie dans ${rainHour}h !`, 'rain');
+    if (tempAlert) sendWeatherNotification(cityName, `🌡️ Température > ${CONFIG.TEMP_THRESHOLD}°C (${highTemp}°C)`, 'temp');
 }
 
 function getWeatherEmoji(code) {
-    const map = { 0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️', 45:'🌫️', 51:'🌦️', 61:'🌧️', 71:'🌨️', 95:'⛈️' };
+    const map = {
+        0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️', 45:'🌫️', 48:'🌫️',
+        51:'🌦️', 53:'🌦️', 55:'🌧️', 56:'🌨️', 57:'🌨️',
+        61:'🌧️', 63:'🌧️', 65:'🌧️', 66:'🌨️', 67:'🌨️',
+        71:'🌨️', 73:'🌨️', 75:'❄️', 77:'🌨️',
+        80:'🌦️', 81:'🌧️', 82:'⛈️', 85:'🌨️', 86:'❄️',
+        95:'⛈️', 96:'⛈️', 99:'⛈️'
+    };
     return map[code] || '🌤️';
 }
 
