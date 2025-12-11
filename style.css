@@ -28,5 +28,20 @@ h1{margin:0 0 16px;font-size:28px}
 .hourly-item.temp-alert{border:2px solid #fb923c}
 .hourly-time{font-weight:600}
 .hourly-temp{margin-top:6px}
+.top-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.small{border-radius:8px;border:0;padding:6px 8px;cursor:pointer}
+
+/* Dark theme variables */
+body.dark{background:#0b1220;color:#e6eef8}
+body.dark .container{background:transparent}
+body.dark .results{background:#071126;color:#e6eef8}
+body.dark .search input[type=search]{background:#0b1220;color:#e6eef8;border:1px solid #1f2937}
+body.dark .search button{background:#0ea5ff}
+body.dark .hourly-item{background:#071528}
+body.dark .meta{color:#94a3b8}
+body.dark .error{color:#ffb4b4}
+
+/* Persisted theme class */
+.theme-on{ /* helper if needed */ }
 
 @media (max-width:480px){.container{margin:20px;padding:12px}}
