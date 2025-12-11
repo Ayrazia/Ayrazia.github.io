@@ -13,13 +13,13 @@
 
         <!-- Barre d'actions minimale : bouton notifications + bascule thème -->
         <div class="toolbar">
-            <button id="notify-btn" type="button">🔔 Activer notifications</button>
-            <button id="theme-toggle" type="button" aria-pressed="false" title="Basculer thème">🌓</button>
+            <button id="notify-btn" type="button" onclick="requestNotificationPermission()">🔔 Activer notifications</button>
+            <button id="theme-toggle" type="button" aria-pressed="false" title="Basculer thème" onclick="toggleTheme()">🌓</button>
         </div>
 
         <div class="search">
-            <input id="city-input" type="search" placeholder="Entrez une ville" aria-label="Ville" />
-            <button id="search-btn">Rechercher</button>
+            <input id="city-input" type="search" placeholder="Entrez une ville" aria-label="Ville" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleSearch(); }" />
+            <button id="search-btn" type="button" onclick="handleSearch()">Rechercher</button>
         </div>
 
         <div id="loading" class="hidden">Chargement…</div>
@@ -49,6 +49,30 @@
         </section>
 
     </main>
+
+    <script>
+        // Petite gestion de thème côté client (ne modifie pas app.js)
+        const THEME_KEY = 'meteo-pwa-theme';
+        function applyTheme(theme) {
+            if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+            else document.documentElement.removeAttribute('data-theme');
+            const btn = document.getElementById('theme-toggle');
+            if (btn) btn.setAttribute('aria-pressed', theme === 'dark');
+            try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+        }
+        function toggleTheme() {
+            const current = localStorage.getItem(THEME_KEY) || '';
+            const next = current === 'dark' ? '' : 'dark';
+            applyTheme(next);
+        }
+        // Appliquer le thème stocké au chargement
+        (function(){
+            try {
+                const stored = localStorage.getItem(THEME_KEY);
+                if (stored) applyTheme(stored);
+            } catch (e) {}
+        })();
+    </script>
 
     <script src="/app.js"></script>
 </body>
