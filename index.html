@@ -13,13 +13,13 @@
 
         <!-- Barre d'actions minimale : bouton notifications + bascule thème -->
         <div class="toolbar">
-            <button id="notify-btn" type="button" onclick="requestNotificationPermission()">🔔 Activer notifications</button>
-            <button id="theme-toggle" type="button" aria-pressed="false" title="Basculer thème" onclick="toggleTheme()">🌓</button>
+            <button id="notify-btn" type="button">🔔 Activer notifications</button>
+            <button id="theme-toggle" type="button" aria-pressed="false" title="Basculer thème">🌓</button>
         </div>
 
         <div class="search">
-            <input id="city-input" type="search" placeholder="Entrez une ville" aria-label="Ville" onkeydown="if(event.key==='Enter'){ event.preventDefault(); handleSearch(); }" />
-            <button id="search-btn" type="button" onclick="handleSearch()">Rechercher</button>
+            <input id="city-input" type="search" placeholder="Entrez une ville" aria-label="Ville" />
+            <button id="search-btn" type="button">Rechercher</button>
         </div>
 
         <div id="loading" class="hidden">Chargement…</div>
@@ -75,5 +75,36 @@
     </script>
 
     <script src="/app.js"></script>
+
+    <script>
+        // Attacher listeners de secours après le chargement de app.js
+        (function attachFallbackListeners(){
+            const searchBtn = document.getElementById('search-btn');
+            const notifyBtn = document.getElementById('notify-btn');
+            const themeToggle = document.getElementById('theme-toggle');
+
+            if (searchBtn) {
+                searchBtn.addEventListener('click', () => {
+                    if (typeof handleSearch === 'function') return handleSearch();
+                    console.warn('handleSearch() non défini');
+                });
+            }
+
+            if (notifyBtn) {
+                notifyBtn.addEventListener('click', () => {
+                    if (typeof requestNotificationPermission === 'function') return requestNotificationPermission();
+                    console.warn('requestNotificationPermission() non défini');
+                });
+            }
+
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    if (typeof toggleTheme === 'function') return toggleTheme();
+                    console.warn('toggleTheme() non défini');
+                });
+            }
+        })();
+    </script>
+
 </body>
 </html>

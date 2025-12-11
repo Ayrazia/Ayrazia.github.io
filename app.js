@@ -330,3 +330,18 @@ function showError(message) {
 function hideError() {
     elements.errorMessage.classList.add('hidden');
 }
+
+// Exposer certaines fonctions au scope global pour que les handlers inline / scripts puissent les appeler
+if (typeof window !== 'undefined') {
+    try {
+        // Fonctions principales
+        if (typeof handleSearch === 'function') window.handleSearch = handleSearch;
+        if (typeof requestNotificationPermission === 'function') window.requestNotificationPermission = requestNotificationPermission;
+        if (typeof sendWeatherNotification === 'function') window.sendWeatherNotification = sendWeatherNotification;
+        // Mise à jour du bouton notifications (utilisé au chargement)
+        if (typeof updateNotifyButton === 'function') window.updateNotifyButton = updateNotifyButton;
+    } catch (e) {
+        // Ne pas planter l'application si exposition échoue
+        console.warn('Impossible d\'exposer des fonctions globales:', e);
+    }
+}
