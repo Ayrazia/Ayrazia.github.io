@@ -1,30 +1,32 @@
-/* Styles minimaux pour l'application météo */
 :root{
-  --bg:#f7fbff;
+  --bg:#f6f9ff;
   --card:#ffffff;
-  --accent:#1e88e5;
-  --muted:#666;
+  --accent:#0b82f6;
+  --danger:#ff5252;
+  --muted:#6b7280;
 }
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
-body{background:var(--bg);color:#111;display:flex;align-items:center;justify-content:center;padding:24px}
-.container{width:100%;max-width:520px;background:var(--card);padding:20px;border-radius:12px;box-shadow:0 6px 18px rgba(12,24,48,0.08)}
-h1{margin:0 0 12px;font-size:1.6rem}
+*{box-sizing:border-box;font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+body{margin:0;background:var(--bg);color:#0f172a}
+.container{max-width:560px;margin:40px auto;padding:20px}
+h1{margin:0 0 16px;font-size:28px}
 .search{display:flex;gap:8px;margin-bottom:12px}
-.search input{flex:1;padding:10px 12px;border:1px solid #e6eef9;border-radius:8px;font-size:1rem}
-.search button{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
+.search input[type=search]{flex:1;padding:10px;border:1px solid #e5e7eb;border-radius:6px}
+.search button{padding:10px 12px;border-radius:6px;border:0;background:var(--accent);color:#fff;cursor:pointer}
+.search button.small{background:#f3f4f6;color:#111;font-size:13px;padding:8px}
 .hidden{display:none}
-#loading{margin:12px 0;color:var(--muted)}
-#error-message{color:#b00020;margin:12px 0}
-.results{margin-top:12px}
-.current{display:flex;gap:12px;align-items:center}
-.icon{font-size:2.4rem}
-.temp{font-size:2rem;font-weight:600}
-.feels,.wind,.humidity{color:var(--muted);font-size:0.95rem}
-.hourly{display:flex;gap:8px;margin-top:8px}
-.hourly-item{background:#f3f8ff;padding:8px;border-radius:8px;text-align:center;min-width:64px}
-.hourly-item.rain-alert{border:2px solid #1976d2}
-.hourly-item.temp-alert{border:2px solid #ff9800}
-.hourly-time{font-size:0.9rem;color:var(--muted)}
-.hourly-icon{font-size:1.2rem;margin:6px 0}
-.hourly-temp{font-weight:600}
+.error{color:var(--danger);margin:8px 0}
+.results{background:var(--card);padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(12,24,39,0.06)}
+.summary{display:flex;flex-direction:column;gap:8px}
+.temp-row{display:flex;align-items:center;gap:12px}
+.icon{font-size:36px}
+.temp{font-size:28px;font-weight:600}
+.meta{display:flex;gap:12px;color:var(--muted);font-size:13px}
+.hourly{margin-top:12px}
+.hourly-list{display:flex;gap:8px}
+.hourly-item{background:#f8fafc;padding:8px;border-radius:8px;text-align:center;min-width:64px}
+.hourly-item.rain-alert{border:2px solid #60a5fa}
+.hourly-item.temp-alert{border:2px solid #fb923c}
+.hourly-time{font-weight:600}
+.hourly-temp{margin-top:6px}
+
+@media (max-width:480px){.container{margin:20px;padding:12px}}

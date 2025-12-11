@@ -1,42 +1,48 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Météo — Recherche</title>
-  <link rel="stylesheet" href="/style.css">
-  <link rel="manifest" href="/manifest.json">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>MeteoR - Recherche</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="container">
-    <h1>Météo</h1>
+    <main class="container">
+        <h1>MeteoR</h1>
 
-    <div class="search">
-      <input id="city-input" type="search" placeholder="Entrez une ville" aria-label="Ville">
-      <button id="search-btn" type="button">Rechercher</button>
-    </div>
-
-    <div id="loading" class="hidden">Chargement…</div>
-    <div id="error-message" class="hidden" role="alert"></div>
-
-    <section id="weather-section" class="hidden results">
-      <h2 id="city-name"></h2>
-      <div class="current">
-        <div id="weather-icon" class="icon"></div>
-        <div class="temps">
-          <div id="temperature" class="temp"></div>
-          <div id="feels-like" class="feels"></div>
-          <div id="wind" class="wind"></div>
-          <div id="humidity" class="humidity"></div>
+        <!-- Champ de recherche simple -->
+        <div class="search">
+            <input id="city-input" type="search" placeholder="Entrez une ville" aria-label="Ville">
+            <button id="search-btn">Rechercher</button>
         </div>
-      </div>
 
-      <h3>Prochaines heures</h3>
-      <div id="hourly-list" class="hourly"></div>
-    </section>
+        <!-- Messages / chargement -->
+        <div id="loading" class="hidden">Chargement…</div>
+        <div id="error-message" class="error hidden" role="alert"></div>
 
-  </main>
+        <!-- Section résultats météo -->
+        <section id="weather-section" class="hidden results">
+            <div class="summary">
+                <div id="city-name" class="city">-</div>
+                <div class="temp-row">
+                    <div id="weather-icon" class="icon">🌤️</div>
+                    <div id="temperature" class="temp">--°C</div>
+                </div>
+                <div class="meta">
+                    <div id="wind"></div>
+                    <div id="humidity"></div>
+                    <div id="feels-like"></div>
+                </div>
+            </div>
 
-  <script src="/app.js"></script>
+            <div class="hourly">
+                <h2>Prochaines heures</h2>
+                <div id="hourly-list" class="hourly-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
 </body>
 </html>

@@ -12,7 +12,6 @@ const CONFIG = {
 const elements = {
     cityInput: document.getElementById('city-input'),
     searchBtn: document.getElementById('search-btn'),
-    notifyBtn: document.getElementById('notify-btn'),
     themeToggle: document.getElementById('theme-toggle'),
     weatherSection: document.getElementById('weather-section'),
     favoritesSection: document.getElementById('favorites-section'),
@@ -34,8 +33,13 @@ let currentCity = null;
 
 // ===== Initialisation =====
 document.addEventListener('DOMContentLoaded', () => {
-    updateNotifyButton();
     registerServiceWorker();
+
+    // Écouteurs UI
+    elements.searchBtn?.addEventListener('click', handleSearch);
+    elements.cityInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleSearch();
+    });
 });
 
 // ===== Service Worker =====
@@ -55,57 +59,26 @@ function isNotificationSupported() {
     return 'Notification' in window && typeof Notification !== 'undefined';
 }
 
-function updateNotifyButton() {
-    if (!isNotificationSupported()) {
-        elements.notifyBtn.textContent = '🔔 Non disponible (iOS)';
-        elements.notifyBtn.disabled = true;
-        return;
-    }
-    
-    if (!('Notification' in window)) {
-        elements.notifyBtn.textContent = '🔔 Notifications non supportées';
-        elements.notifyBtn.disabled = true;
-        return;
-    }
-
-    const permission = Notification.permission;
-    
-    if (permission === 'granted') {
-        elements.notifyBtn.textContent = '✅ Notifications activées';
-        elements.notifyBtn.classList.add('granted');
-        elements.notifyBtn.classList.remove('denied');
-    } else if (permission === 'denied') {
-        elements.notifyBtn.textContent = '❌ Notifications bloquées';
-        elements.notifyBtn.classList.add('denied');
-        elements.notifyBtn.classList.remove('granted');
-    } else {
-        elements.notifyBtn.textContent = '🔔 Activer les notifications';
-        elements.notifyBtn.classList.remove('granted', 'denied');
-    }
-}
-
 async function requestNotificationPermission() {
     if (!('Notification' in window)) {
-        showError('Les notifications ne sont pas supportées par votre navigateur.');
+        // Ne pas afficher d'erreur UI pour rester minimal
         return;
     }
 
     if (Notification.permission === 'denied') {
-        showError('Les notifications sont bloquées. Veuillez les réactiver dans les paramètres de votre navigateur.');
         return;
     }
 
     try {
         const permission = await Notification.requestPermission();
-        updateNotifyButton();
-        
         if (permission === 'granted') {
-            // Notification de test
-            new Notification('MétéoPWA', {
-                body: 'Les notifications sont maintenant activées ! 🎉',
-                icon: 'icons/icon-192.png',
-                tag: 'welcome'
-            });
+            // Notification de test silencieuse
+            try {
+                new Notification('MeteoR', {
+                    body: 'Notifications activées',
+                    icon: 'icons/icon-192.png'
+                });
+            } catch (e) {}
         }
     } catch (error) {
         console.error('Erreur lors de la demande de permission:', error);
@@ -113,8 +86,38 @@ async function requestNotificationPermission() {
 }
 
 function sendWeatherNotification(city, message, type = 'info') {
-  
+    if (!isNotificationSupported()) return;
+
+    if (Notification.permission === 'granted') {
+        navigator.serviceWorker.getRegistration().then(reg => {
+            const options = {
+                body: `${city} — ${message}`,
+                icon: 'icons/icon-192.png',
+                tag: `meteo-${type}-${city}`,
+                renotify: true
+            };
+
+            if (reg && reg.showNotification) {
+                reg.showNotification('MeteoR', options);
+            } else {
+                // Fallback si pas de SW ou showNotification
+                new Notification('MeteoR', options);
+            }
+        }).catch(err => {
+            console.error('Erreur récupération registration SW:', err);
+            // Fallback
+            try { new Notification('MeteoR', { body: `${city} — ${message}`, icon: 'icons/icon-192.png' }); } catch(e){}
+        });
+    } else if (Notification.permission === 'default') {
+        // Tenter de demander la permission avant d'envoyer
+        requestNotificationPermission().then(() => {
+            if (Notification.permission === 'granted') {
+                sendWeatherNotification(city, message, type);
+            }
+        });
+    }
 }
+
 // ===== Recherche et API Météo =====
 async function handleSearch() {
     const query = elements.cityInput.value.trim();
@@ -198,19 +201,23 @@ function displayWeather(data, cityName) {
     elements.humidity.textContent = `${current.relative_humidity_2m} %`;
     elements.feelsLike.textContent = `${Math.round(current.apparent_temperature)}°C`;
 
+    // Trouver l'index de l'heure courante dans hourly.time (première heure future)
+    const now = Date.now();
+    let currentIndex = hourly.time.findIndex(t => new Date(t).getTime() > now);
+    if (currentIndex === -1) currentIndex = 0; // fallback
+
     // Prévisions horaires (4 prochaines heures)
-    const currentHour = new Date().getHours();
     const hourlyItems = [];
-    
+
     for (let i = 0; i < 4; i++) {
-        const hourIndex = currentHour + i + 1;
+        const hourIndex = currentIndex + i;
         if (hourIndex < hourly.time.length) {
             const time = new Date(hourly.time[hourIndex]);
             const temp = hourly.temperature_2m[hourIndex];
             const code = hourly.weather_code[hourIndex];
             const isRain = CONFIG.RAIN_CODES.includes(code);
             const isHighTemp = temp > CONFIG.TEMP_THRESHOLD;
-            
+
             let alertClass = '';
             if (isRain) alertClass = 'rain-alert';
             else if (isHighTemp) alertClass = 'temp-alert';
@@ -231,26 +238,28 @@ function displayWeather(data, cityName) {
 
 function checkWeatherAlerts(data, cityName) {
     const hourly = data.hourly;
-    const currentHour = new Date().getHours();
-    
+    const now = Date.now();
+    let currentIndex = hourly.time.findIndex(t => new Date(t).getTime() > now);
+    if (currentIndex === -1) currentIndex = 0;
+
     let rainAlert = false;
     let tempAlert = false;
     let rainHour = null;
     let highTemp = null;
 
     // Vérifier les 4 prochaines heures
-    for (let i = 1; i <= 4; i++) {
-        const hourIndex = currentHour + i;
+    for (let i = 0; i < 4; i++) {
+        const hourIndex = currentIndex + i;
         if (hourIndex < hourly.time.length) {
             const code = hourly.weather_code[hourIndex];
             const temp = hourly.temperature_2m[hourIndex];
-            
+
             // Vérifier la pluie
             if (!rainAlert && CONFIG.RAIN_CODES.includes(code)) {
                 rainAlert = true;
-                rainHour = i;
+                rainHour = i + 1; // i=0 => dans 1 heure
             }
-            
+
             // Vérifier la température > 10°C
             if (!tempAlert && temp > CONFIG.TEMP_THRESHOLD) {
                 tempAlert = true;
