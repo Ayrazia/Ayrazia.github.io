@@ -348,6 +348,35 @@ function getWeatherEmoji(code) {
     return map[code] || '🌤️';
 }
 
+let deferredPrompt;
+const btnInstall = document.getElementById('btnInstall');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Empêcher la boîte de dialogue automatique
+    e.preventDefault();
+    // Sauvegarder l'événement pour l’utiliser plus tard
+    deferredPrompt = e;
+    // Afficher le bouton
+    btnInstall.style.display = 'block';
+});
+
+btnInstall.addEventListener('click', async () => {
+    // Cacher le bouton après clic
+    btnInstall.style.display = 'none';
+    if (deferredPrompt) {
+        deferredPrompt.prompt(); // Affiche la boîte d'installation
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response: ${outcome}`); // 'accepted' ou 'dismissed'
+        deferredPrompt = null; // Réinitialiser
+    }
+});
+
+window.addEventListener('appinstalled', () => {
+    console.log('PWA installée !');
+    btnInstall.style.display = 'none';
+});
+
+
 function showLoading() { elements.loading.classList.remove('hidden'); elements.weatherSection.classList.add('hidden'); }
 function hideLoading() { elements.loading.classList.add('hidden'); }
 function showError(msg) { elements.errorMessage.textContent = msg; elements.errorMessage.classList.remove('hidden'); }
