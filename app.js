@@ -356,24 +356,29 @@ window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     // Sauvegarder l'événement pour l’utiliser plus tard
     deferredPrompt = e;
-    // Afficher le bouton
-    btnInstall.style.display = 'block';
-});
-
-btnInstall.addEventListener('click', async () => {
-    // Cacher le bouton après clic
-    btnInstall.style.display = 'none';
-    if (deferredPrompt) {
-        deferredPrompt.prompt(); // Affiche la boîte d'installation
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response: ${outcome}`); // 'accepted' ou 'dismissed'
-        deferredPrompt = null; // Réinitialiser
+    // Afficher le bouton si présent
+    if (btnInstall) {
+        btnInstall.style.display = 'block';
     }
 });
 
+// Attacher le gestionnaire de clic uniquement si l'élément existe
+if (btnInstall) {
+    btnInstall.addEventListener('click', async () => {
+        // Cacher le bouton après clic
+        btnInstall.style.display = 'none';
+        if (deferredPrompt) {
+            deferredPrompt.prompt(); // Affiche la boîte d'installation
+            const userChoice = await deferredPrompt.userChoice;
+            console.log(`User response: ${userChoice.outcome}`); // 'accepted' ou 'dismissed'
+            deferredPrompt = null; // Réinitialiser
+        }
+    });
+}
+
 window.addEventListener('appinstalled', () => {
     console.log('PWA installée !');
-    btnInstall.style.display = 'none';
+    if (btnInstall) btnInstall.style.display = 'none';
 });
 
 

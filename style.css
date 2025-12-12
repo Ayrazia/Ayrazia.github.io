@@ -71,6 +71,27 @@ h2 { margin: 0 0 12px 0; font-size: 18px; }
   border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
 
+/* Bouton d'installation (fixe en haut à droite) */
+#btnInstall {
+  display: none; /* affiché dynamiquement depuis app.js */
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 9999;
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(11,130,246,0.18);
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+
+#btnInstall:hover { transform: translateY(-2px); }
+#btnInstall:active { transform: translateY(0); }
+
 /* Recherche */
 .search { display: flex; gap: 8px; margin-bottom: 12px; }
 .search input { flex: 1; padding: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); border-radius: 6px; }
@@ -130,4 +151,8 @@ h2 { margin: 0 0 12px 0; font-size: 18px; }
 @media (max-width: 600px) {
   .main-wrapper { flex-direction: column; align-items: stretch; margin: 20px auto; }
   .weather-card, .favorites-card { max-width: 100%; }
+}
+
+@media (max-width: 420px) {
+  #btnInstall { top: 8px; right: 8px; padding: 6px 10px; font-size: 14px; }
 }
